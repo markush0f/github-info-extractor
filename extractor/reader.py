@@ -29,3 +29,32 @@ class GitHubReader:
         except Exception as e:
             logger.error(f"Error decoding README for repo {repo}: {e}")
             return None
+        async def get_branches(self, username: str, repo: str):
+        return await self.client.get_json(f"/repos/{username}/{repo}/branches")
+
+    async def get_commit_count(self, username: str, repo: str):
+        endpoint = f"/repos/{username}/{repo}/commits?per_page=1"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{self.client.base_url}{endpoint}", headers=self.client.headers)
+
+            if response.status_code == 409:
+                return 0
+
+            response.raise_for_status()
+
+            link = response.headers.get("Link", None)
+            if not link:
+                return 1
+
+            parts = link.split(",")
+            for part in parts:
+                if 'rel="last"' in part:
+                    url = part.split(";")[0].strip("<>")
+                    query = url.split("?")[1]
+                    params = query.split("&")
+                    for p in params:
+                        if p.startswith("page="):
+                            return int(p.replace("page=", ""))
+
+            return 1
+
