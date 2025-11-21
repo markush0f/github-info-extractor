@@ -1,5 +1,7 @@
 import base64
 
+import httpx
+
 from .github_client import GitHubClient
 from .logger import logger
 
@@ -29,7 +31,8 @@ class GitHubReader:
         except Exception as e:
             logger.error(f"Error decoding README for repo {repo}: {e}")
             return None
-        async def get_branches(self, username: str, repo: str):
+        
+    async def get_branches(self, username: str, repo: str):
         return await self.client.get_json(f"/repos/{username}/{repo}/branches")
 
     async def get_commit_count(self, username: str, repo: str):
@@ -57,4 +60,15 @@ class GitHubReader:
                             return int(p.replace("page=", ""))
 
             return 1
+        
+    async def get_user_commits(self, username: str, repo_owner: str, repo: str):
+        return await self.client.get_json(
+            f"/repos/{repo_owner}/{repo}/commits?author={username}"
+        )
+
+    async def get_commit_detail(self, repo_owner: str, repo: str, sha: str):
+        return await self.client.get_json(
+            f"/repos/{repo_owner}/{repo}/commits/{sha}"
+        )
+
 
