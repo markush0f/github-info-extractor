@@ -13,7 +13,7 @@ SUMMARY_PATH = BASE_DIR / "output" / "summaries"
 LANGUAGES_PATH = BASE_DIR / "output" / "languages"
 
 if __name__ == "__main__":
-    project_paths = list_projects(BASE_PATH)
+    project_paths = list_projects(str(BASE_PATH))
 
     for project_path in project_paths:
         project_name = os.path.basename(project_path)
@@ -22,6 +22,6 @@ if __name__ == "__main__":
         summary = summarize_project(content, "gpt-4o-mini")
         languages = get_projects_languages(project_path)
 
-        save_summary(project_name, summary, SUMMARY_PATH)
-        save_languages_data(project_name, languages, LANGUAGES_PATH)
+        save_summary(project_name, summary, str(SUMMARY_PATH))
+        save_languages_data(project_name, languages, str(LANGUAGES_PATH))
         print(f"Summary generated for: {project_name}")

@@ -1,25 +1,41 @@
-from sqlmodel import Session
+from app.db import get_session
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 
 
 class UserService:
-    def __init__(self, session: Session):
-        self.session = session
-        self.repository = UserRepository(session)
+    # Opens a database session and creates a repository
+    def __init__(self):
+        self.session = get_session()
+        self.repository = UserRepository(self.session)
 
-    def create_user(
-        self, username: str, name: str = None, bio: str = None, avatar_url: str = None
-    ):
+    # Creates a user if it does not exist
+    def create_user(self, username, name, bio, avatar_url, github_username):
         existing = self.repository.get_by_username(username)
         if existing:
+            self.session.close()
             return existing
 
-        user = User(username=username, name=name, bio=bio, avatar_url=avatar_url)
-        return self.repository.create(user)
+        user = User(
+            username=username,
+            name=name,
+            bio=bio,
+            avatar_url=avatar_url,
+            github_username=github_username,
+        )
 
-    def get_user(self, user_id):
-        return self.repository.get_by_id(user_id)
+        result = self.repository.create(user)
+        self.session.close()
+        return result
 
+    # Retrieves a user by ID
+    def get_user(self, user_id: str):
+        result = self.repository.get_by_id(user_id)
+        self.session.close()
+        return result
+
+    # Retrieves all users
     def list_users(self):
-        return self.repository.get_all()
+        result = self.repository.get_all()
+        self.session.close()
+        return result

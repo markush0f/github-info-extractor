@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from app.router.user_router import router as user_router
-
+from app.router.project_router import router as project_router
 app = FastAPI()
 
 
@@ -11,6 +11,7 @@ def health():
 
 
 app.include_router(user_router)
+app.include_router(project_router)
 
 if __name__ == "__main__":
     import uvicorn

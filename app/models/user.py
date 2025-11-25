@@ -4,6 +4,7 @@ import uuid
 
 
 class User(SQLModel, table=True):
+    __tablename__ = "users" # type: ignore
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     username: str
     name: Optional[str] = None
