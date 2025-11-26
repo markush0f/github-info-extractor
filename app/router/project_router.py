@@ -43,4 +43,10 @@ def delete_project(project_id: str):
     service = ProjectService()
     return service.delete_project(project_id)
 
+@router.post("/github/all")
+def save_projects_github():
+    return 
 
+@router.post("/github/{name}")
+def save_project_github(name: str):
+    return 
