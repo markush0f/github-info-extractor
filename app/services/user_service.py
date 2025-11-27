@@ -39,3 +39,8 @@ class UserService:
         result = self.repository.get_all()
         self.session.close()
         return result
+
+    def get_user_by_github(self, github_username: str):
+        user = self.repository.get_by_github_username(github_username)
+        self.session.close()
+        return user

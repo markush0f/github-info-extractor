@@ -9,47 +9,53 @@ class GithubInfoService:
     def __init__(self) -> None:
         self.github_client = GithubClientService()
 
-    async def extract(self, username: str):
+    async def extract(self, username: str, internal_user_id: str | None = None):
         logger.debug(f"Extracting GitHub data for user: {username}")
 
         user_raw = await self.github_client.get_user(username)
         repos_raw = await self.github_client.get_repos(username)
 
         user = normalize_user(user_raw)
+        user["github_username"] = username
+        user["id"] = internal_user_id  # Internal user id injected from router
+
         main_readme = await self.github_client.get_readme(username, username)
         user["readme"] = main_readme
 
         repos = []
         for repo in repos_raw:
             repo_data = await self._process_single_repo(username, repo)
+
+            # Attach internal user id to repo
+            repo_data["user_id"] = internal_user_id
+
             repos.append(repo_data)
 
         top_languages = self._compute_top_languages(repos)
         user["top_languages"] = top_languages
 
-        # Added saving user data
-        save_json(user, f"output/user/user.json")
+        # Save user
+        save_json(user, "output/user/user.json")
         if main_readme:
-            save_text(main_readme, f"output/user/readme.md")
+            save_text(main_readme, "output/user/readme.md")
 
-        # Added saving global languages
-        save_json(top_languages, f"output/languages/top_languages.json")
+        # Save languages
+        save_json(top_languages, "output/languages/top_languages.json")
 
-        # Added saving project data
+        # Save repos
         for repo in repos:
             name = repo["name"]
             base = f"output/projects/{name}"
 
             save_json(repo, f"{base}/repo.json")
 
-            readme = repo.get("readme")
-            if readme:
-                save_text(readme, f"{base}/readme.md")
+            if repo.get("readme"):
+                save_text(repo["readme"], f"{base}/readme.md")
 
-            languages = repo.get("languages", {})
-            save_json(languages, f"{base}/languages.json")
+            save_json(repo.get("languages", {}), f"{base}/languages.json")
 
         return {"user": user, "repos": repos}
+
 
     async def _process_single_repo(self, username: str, repo: dict):
         repo_data = normalize_repo(repo)

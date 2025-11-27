@@ -43,6 +43,8 @@ def extract_languages(base_path: str):
 def extract_projects(base_path: str):
     # Extract all project data
     projects_dir = os.path.join(base_path, "projects")
+    os.makedirs(projects_dir, exist_ok=True)
+    
     projects = []
 
     for repo_name in os.listdir(projects_dir):
@@ -67,12 +69,40 @@ def extract_projects(base_path: str):
     return projects
 
 
+# Added: extract summaries from output/summaries
+def extract_summaries(base_path: str):
+    summaries_dir = os.path.join(base_path, "summaries")
+    summaries = {}
+
+    if not os.path.exists(summaries_dir):
+        return summaries
+
+    for project_name in os.listdir(summaries_dir):
+        project_path = os.path.join(summaries_dir, project_name)
+        if not os.path.isdir(project_path):
+            continue
+
+        summary_path = os.path.join(project_path, "summary.txt")
+        if os.path.exists(summary_path):
+            summaries[project_name] = normalize_text(load_text(summary_path))
+        else:
+            summaries[project_name] = None
+
+    return summaries
+
+
 def extract_all_output():
-    # Extract full output folder data
     base_path = "output"
 
     user = extract_user_data(base_path)
     languages = extract_languages(base_path)
     projects = extract_projects(base_path)
+    # Controlar de que si nio hay summaries devuelva False u otra
+    # summaries = extract_summaries(base_path)
 
-    return {"user": user, "languages": languages, "projects": projects}
+    return {
+        "user": user,
+        "languages": languages,
+        "projects": projects,
+        # "summaries": summaries ,
+    }

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.services.github_info_service import GithubInfoService
 from app.services.user_service import UserService
 from app.models.user import User
@@ -29,7 +29,16 @@ def get_user(user_id: str):
     service = UserService()
     return service.get_user(user_id)
 
+
 @router.get("/github/info/{username}")
-async def  extract_info_github(username: str):
-    service = GithubInfoService()
-    return await service.extract(username)
+async def extract_info_github(username: str):
+    user_service = UserService()
+    github_service = GithubInfoService()
+
+    internal_user = user_service.get_user_by_github(username)
+    if not internal_user:
+        raise HTTPException(404, "Internal user not found")
+
+    return await github_service.extract(
+        username=username, internal_user_id=str(internal_user.id)
+    )

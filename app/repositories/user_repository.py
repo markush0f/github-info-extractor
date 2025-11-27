@@ -27,3 +27,9 @@ class UserRepository:
     def get_all(self):
         statement = select(User)
         return self.session.exec(statement).all()
+
+
+    def get_by_github_username(self, github_username: str):
+        statement = select(User).where(User.github_username == github_username)
+        result = self.session.exec(statement).first()
+        return result
