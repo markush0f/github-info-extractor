@@ -1,5 +1,8 @@
+import uuid
 from fastapi import APIRouter, HTTPException
+from app.services import user_service
 from app.services.github_info_service import GithubInfoService
+from app.services.user_languages_service import UserLanguagesService
 from app.services.user_service import UserService
 from app.models.user import User
 
@@ -42,3 +45,13 @@ async def extract_info_github(username: str):
     return await github_service.extract(
         username=username, internal_user_id=str(internal_user.id)
     )
+
+@router.post("/{user_id}/languages/save")
+def save_user_languages(user_id: str):
+    user_service = UserService()
+    if not user_service.get_user_by_id(id=user_id):
+        raise HTTPException(404, "Internal user not found")
+    
+    service = UserLanguagesService()
+    result = service.save_user_languages(uuid.UUID(user_id))
+    return {"saved": len(result)}
