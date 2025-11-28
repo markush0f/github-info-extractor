@@ -13,7 +13,8 @@ class ProjectLanguagesService:
         self.repo = ProjectLanguagesRepository(self.session)
         self.projects = ProjectRepository(self.session)
 
-    def save_project_languages(self, project_id: str):
+    # Save languages for a single project
+    def save_single_project_languages(self, project_id: str):
         project = self.projects.get_by_id(project_id)
         if not project:
             self.session.close()
@@ -32,9 +33,29 @@ class ProjectLanguagesService:
 
         for lang, bytes_value in languages.items():
             item = ProjectLanguage(
-                project_id=uuid.UUID(project_id), language=lang, bytes=bytes_value
+                project_id=uuid.UUID(project_id),
+                language=lang,
+                bytes=bytes_value
             )
             saved.append(self.repo.create(item))
 
-        self.session.close()
         return saved
+
+    # Save languages for all or selected projects
+    def save_multiple_projects_languages(self, user_id: str, selection):
+        if selection == "all":
+            projects = self.projects.get_all(user_id)
+        else:
+            projects = [self.projects.get_by_id(pid) for pid in selection]
+
+        total_saved = 0
+
+        for project in projects:
+            if not project:
+                continue
+
+            saved = self.save_single_project_languages(str(project.id))
+            total_saved += len(saved)
+
+        self.session.close()
+        return total_saved
