@@ -95,7 +95,11 @@ def extract_summaries(base_path: str):
 
     return summaries
 
-
+def load_user_languages():
+    path = "output/languages/top_languages.json"
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+    
 def extract_all_output():
     base_path = "output"
 

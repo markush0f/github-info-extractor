@@ -12,6 +12,10 @@ output/
 # C extensions
 *.so
 
+.logs/
+logs/
+logs
+*.log
 # Distribution / packaging
 .Python
 build/
