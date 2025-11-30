@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from app.router.user_router import router as user_router
-from app.router.project_router import router as project_router
-from app.router.entity_router import router as entity_router
-from app.router.embedding_router import router as embedding_router
+from app.domains.users.router import router as user_router
+from app.domains.projects.router import router as project_router
+from app.domains.entities.router import router as entity_router
+from app.domains.embeddings.router import router as embedding_router
 
 app = FastAPI()
 
