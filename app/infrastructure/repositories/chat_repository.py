@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
-from domains.chat.models.chat import Chat
 from uuid import UUID
+from app.domains.chats.models.chat import Chat
 
 
 class ChatRepository:

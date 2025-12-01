@@ -1,6 +1,6 @@
 from openai import OpenAI
 from app.infrastructure.repositories.embedding_repository import EmbeddingRepository
-from core.db import get_session
+from app.core.db import get_session
 
 
 class VectorSearchService:

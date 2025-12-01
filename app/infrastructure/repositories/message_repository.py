@@ -1,7 +1,7 @@
 from sqlmodel import Session
 from sqlalchemy import text
-from domains.chat.models.message import Message
 from uuid import UUID
+from app.domains.messages.models.message import Message
 
 
 class MessageRepository:
