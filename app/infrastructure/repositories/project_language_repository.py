@@ -2,6 +2,7 @@ from app.domains.projects.models.project_language import ProjectLanguage
 
 
 class ProjectLanguagesRepository:
+    model_name = "Project language"
     def __init__(self, session):
         self.session = session
 

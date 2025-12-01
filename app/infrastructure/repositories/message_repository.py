@@ -1,10 +1,12 @@
-from sqlmodel import Session
+from sqlmodel import Session, select, desc, asc
 from sqlalchemy import text
 from uuid import UUID
 from app.domains.messages.models.message import Message
 
 
 class MessageRepository:
+    model_name = "Message"
+
     def __init__(self, session: Session):
         # Added DB session dependency
         self.session = session
@@ -20,36 +22,24 @@ class MessageRepository:
         # Added retrieval by PK
         return self.session.get(Message, message_id)
 
+
     def get_all_by_chat(self, chat_id: UUID) -> list[Message]:
-        # Added SQL query with manual ordering
-        sql = text(
-            """
-            SELECT * FROM messages
-            WHERE chat_id = :chat_id
-            ORDER BY created_at ASC
-        """
+        query = (
+            select(Message)
+            .where(Message.chat_id == chat_id)
+            .order_by(asc(Message.created_at))
         )
+        return list(self.session.exec(query).all())
 
-        rows = self.session.execute(sql, {"chat_id": str(chat_id)}).fetchall()
-        return [Message(**dict(row)) for row in rows]
 
-    def get_last_n(self, chat_id: UUID, limit: int) -> list[Message]:
-        # Added SQL query for last N messages
-        sql = text(
-            """
-            SELECT * FROM messages
-            WHERE chat_id = :chat_id
-            ORDER BY created_at DESC
-            LIMIT :limit
-        """
+    def get_last_n(self, chat_id: UUID, limit: int = 10):
+        query = (
+            select(Message)
+            .where(Message.chat_id == chat_id)
+            .order_by(desc(Message.created_at))
+            .limit(limit)
         )
-
-        rows = self.session.execute(
-            sql, {"chat_id": str(chat_id), "limit": limit}
-        ).fetchall()
-
-        messages = [Message(**dict(row)) for row in rows]
-        return messages[::-1]
+        return self.session.exec(query).all()
 
     def delete_by_chat(self, chat_id: UUID):
         # Added deletion SQL

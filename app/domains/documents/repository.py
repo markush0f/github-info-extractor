@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy import text
 
 from app.domains.documents.models.document import Document  
@@ -28,3 +29,12 @@ class DocumentRepository:
 
         rows = self.session.execute(query, {"u": user_id})
         return [Document.model_validate(row) for row in rows]
+
+    
+    def delete_all_by_user(self, user_id: uuid.UUID):
+        sql = text("""
+            DELETE FROM projects
+            WHERE user_id = :user_id
+        """)
+        self.session.execute(sql, {"user_id": user_id})
+        self.session.commit()

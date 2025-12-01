@@ -46,12 +46,20 @@ async def extract_info_github(username: str):
         username=username, internal_user_id=str(internal_user.id)
     )
 
+
 @router.post("/{user_id}/languages/save")
 def save_user_languages(user_id: str):
     user_service = UserService()
     if not user_service.get_user_by_id(id=user_id):
         raise HTTPException(404, "Internal user not found")
-    
+
     service = UserLanguagesService()
     result = service.save_user_languages(uuid.UUID(user_id))
     return {"saved": len(result)}
+
+
+@router.delete("/all/{user_id}")
+def delete_user_all_information(user_id: str):
+    user_service = UserService()
+    user_service.delete_user_data(uuid.UUID(user_id))
+    return {"deleted": True}

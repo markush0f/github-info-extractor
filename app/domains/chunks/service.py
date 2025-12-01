@@ -1,7 +1,6 @@
 import uuid
 from app.core.db import get_session
 from app.infrastructure.repositories.chunk_repository import ChunkRepository
-from app.domains.documents.repository import DocumentRepository
 from app.domains.chunks.models.chunk import Chunk
 from app.core.logger import logger
 
@@ -9,9 +8,7 @@ from app.core.logger import logger
 class ChunkService:
     def __init__(self):
         self.session = get_session()
-        self.documents = DocumentRepository(self.session)
-        self.chunks = ChunkRepository(self.session)
-        logger.info("ChunkService initialized")
+        self.chunk_repository = ChunkRepository(self.session)
 
     def _split(self, text: str, max_tokens: int = 300):
         words = text.split()
@@ -30,25 +27,23 @@ class ChunkService:
         logger.debug(f"Split text into {len(parts)} chunks")
         return parts
 
-    def create_chunks_for_document(self, document_id: uuid.UUID):
+    def create_chunks_for_document(self, document):
+        document_id = document.id
         logger.info(f"Processing document {document_id}")
 
-        doc = self.documents.get_by_id(str(document_id))
-        if not doc:
-            logger.warning(f"Document {document_id} not found")
-            self.session.close()
-            return []
+        self.chunk_repository.delete_by_document(document_id)
 
-        self.chunks.delete_by_document(document_id)
-        logger.info(f"Deleted previous chunks for document {document_id}") 
-        parts = self._split(doc.content)
+        parts = self._split(document.content)
 
         created = []
         for idx, text in enumerate(parts):
             chunk = Chunk(document_id=document_id, chunk_index=idx, chunk_text=text)
-            created_chunk = self.chunks.create(chunk)
-            created.append(created_chunk)
-            logger.debug(f"Created chunk {created_chunk.id} index {idx}")
+            created.append(self.chunk_repository.create(chunk))
 
-        logger.info(f"Created {len(created)} chunks for document {document_id}")
         return created
+
+    def delete_all(self, user_id):
+        self.chunk_repository.delete_all_by_user(user_id)
+        
+    def get_by_id(self, id)-> Chunk:
+        return self.chunk_repository.get_by_id(id)

@@ -4,6 +4,7 @@ from app.domains.chats.models.chat import Chat
 
 
 class ChatRepository:
+    model_name = "Chat"
     def __init__(self, session: Session):
         self.session = session
 

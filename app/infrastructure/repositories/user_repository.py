@@ -3,6 +3,7 @@ from app.domains.users.models.user import User
 
 
 class UserRepository:
+    model_name = "User"
     # Stores a session for database operations
     def __init__(self, session: Session):
         self.session = session

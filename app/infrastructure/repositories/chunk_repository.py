@@ -1,8 +1,10 @@
+import uuid
 from app.domains.chunks.models.chunk import Chunk
 from sqlalchemy import text  
 
 
 class ChunkRepository:
+    model_name = "Chunk"
     def __init__(self, session):
         self.session = session
 
@@ -28,3 +30,14 @@ class ChunkRepository:
 
     def get_by_id(self, entity_id: str):
         return self.session.get(Chunk, entity_id)
+
+    def delete_all_by_user(self, user_id: uuid.UUID):
+        sql = text("""
+        DELETE FROM chunks
+            USING documents, entities
+            WHERE chunks.document_id = documents.id
+            AND documents.entity_id = entities.id
+            AND entities.user_id = :user_id
+        """)
+        self.session.execute(sql, {"user_id": user_id})
+        self.session.commit()

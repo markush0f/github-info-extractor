@@ -1,9 +1,10 @@
 import uuid
 from sqlmodel import Session, select
 from app.domains.projects.models.project import Project
-
+from sqlalchemy import text
 
 class ProjectRepository:
+    model_name = "Project"
     # Stores a session for database operations
     def __init__(self, session: Session):
         self.session = session
@@ -48,3 +49,11 @@ class ProjectRepository:
             self.session.delete(project)
             self.session.commit()
         return project
+
+    def delete_all_by_user(self, user_id: uuid.UUID):
+        sql = text("""
+            DELETE FROM projects
+            WHERE user_id = :user_id
+        """)
+        self.session.execute(sql, {"user_id": user_id})
+        self.session.commit()

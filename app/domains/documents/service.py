@@ -1,24 +1,22 @@
+from typing import List
 import uuid
 from app.core.db import get_session
 from app.domains.documents.models.document import Document
 from app.domains.documents.repository import DocumentRepository
-from app.infrastructure.repositories.entity_repository import EntityRepository
+from app.domains.entities.service import EntityService
 from app.domains.documents.builder_service import DocumentBuilderService
+from app.shared.services.record_finder import RecordFinder
 
 
 class DocumentService:
     def __init__(self):
         self.session = get_session()
-        self.repo = DocumentRepository(self.session)
-        self.entity_repo = EntityRepository(self.session)
+        self.document_repository = DocumentRepository(self.session)
+        self.entity_service = EntityService()
         self.builder = DocumentBuilderService()
+        self.record_finder = RecordFinder(repo=self.document_repository)
 
-    def generate_document(self, entity_id: uuid.UUID):
-        entity = self.entity_repo.get_by_id(str(entity_id))
-        if not entity:
-            self.session.close()
-            return None
-
+    def generate_document(self, entity):
         entity_dict = {
             "id": str(entity.id),
             "type": entity.type,
@@ -27,9 +25,15 @@ class DocumentService:
         }
 
         title, content = self.builder.build_document(entity_dict)
-
         document = Document(entity_id=entity.id, title=title, content=content)
 
-        saved = self.repo.create(document)
-        self.session.close()
-        return saved
+        return self.document_repository.create(document)
+    
+    def get_by_id(self, id: uuid.UUID):
+        return self.record_finder.find_or_404(record_id=id)
+        
+    def get_by_user_id(self, user_id: uuid.UUID) -> List[Document]:
+        return self.document_repository.get_by_user(user_id)
+        
+    def delete_all(self, user_id):
+        self.document_repository.delete_all_by_user(user_id)

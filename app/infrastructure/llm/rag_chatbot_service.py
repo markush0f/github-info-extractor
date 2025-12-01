@@ -1,5 +1,5 @@
 from openai import OpenAI
-from app.shared.utils.rag_context_builder import RagContextBuilder
+from app.shared.services.rag_context_builder import RagContextBuilder
 from domains.embeddings.vector_search_service import VectorSearchService
 
 

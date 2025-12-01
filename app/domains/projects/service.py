@@ -167,3 +167,6 @@ class ProjectService:
 
         created = self.project_repository.create(new_project)
         return created
+    
+    def delete_all(self, user_id):
+        self.project_repository.delete_all_by_user(user_id)

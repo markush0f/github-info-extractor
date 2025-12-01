@@ -5,6 +5,7 @@ from app.domains.projects.router import router as project_router
 from app.domains.entities.router import router as entity_router
 from app.domains.embeddings.router import router as embedding_router
 from app.domains.chats.router import router as chat_router
+from app.shared.exceptions.exception_handler import add_exception_handlers
 
 app = FastAPI()
 
@@ -13,7 +14,7 @@ app = FastAPI()
 def health():
     return JSONResponse(content={"status": "ok"}, status_code=200)
 
-
+add_exception_handlers(app)
 app.include_router(user_router)
 app.include_router(project_router)
 app.include_router(entity_router)
