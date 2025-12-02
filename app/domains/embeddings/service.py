@@ -23,6 +23,36 @@ class EmbeddingService:
         )
         return response.data[0].embedding
 
+    
+
+    def process_user(self, user_id: uuid.UUID):
+        logger.info(f"Processing embeddings for user {user_id}")  
+
+        docs = self.document_service.get_by_user_id(user_id)
+        doc_ids = [d.id for d in docs]
+        logger.info(f"Found {len(doc_ids)} documents for user {user_id}")  
+
+        all_chunks = []
+        for document in docs:
+            chunks = self.chunk_service.create_chunks_for_document(document)
+            all_chunks.extend(chunks)
+
+        logger.info(f"Created {len(all_chunks)} chunks for user {user_id}")  
+        
+        self.session.commit()
+        
+        chunk_ids = [c.id for c in all_chunks]
+        
+        embeddings = self.create_embeddings_for_chunks(chunk_ids)
+
+        logger.info(f"Created embeddings for user {user_id}")  
+
+        return {
+            "documents_processed": len(doc_ids),
+            "chunks_created": len(all_chunks),
+            "embeddings_created": len(embeddings),
+        }
+
     def create_embeddings_for_chunks(self, chunk_ids: list[uuid.UUID]):
         logger.info(f"Creating embeddings for {len(chunk_ids)} chunks")  
         created = []
@@ -44,36 +74,7 @@ class EmbeddingService:
         logger.info(f"Created {len(created)} embeddings")  
         
         return created
-
-    def process_user(self, user_id: uuid.UUID):
-        logger.info(f"Processing embeddings for user {user_id}")  
-
-        docs = self.document_service.get_by_user_id(user_id)
-        doc_ids = [d.id for d in docs]
-        logger.info(f"Found {len(doc_ids)} documents for user {user_id}")  
-
-        all_chunks = []
-        for doc_id in doc_ids:
-            logger.info(f"Creating chunks for document {doc_id}")  
-            chunks = self.chunk_service.create_chunks_for_document(doc_id)
-            all_chunks.extend(chunks)
-
-        logger.info(f"Created {len(all_chunks)} chunks for user {user_id}")  
-        
-        self.session.commit()
-        
-        chunk_ids = [c.id for c in all_chunks]
-        
-        embeddings = self.create_embeddings_for_chunks(chunk_ids)
-
-        logger.info(f"Created embeddings for user {user_id}")  
-
-        return {
-            "documents_processed": len(doc_ids),
-            "chunks_created": len(all_chunks),
-            "embeddings_created": len(embeddings),
-        }
-
+    
     def delete_all(self, user_id):
         self.embedding_repository.delete_all_by_user(user_id)
         self.session.commit()
