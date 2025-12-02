@@ -1,3 +1,4 @@
+import uuid
 from openai import OpenAI
 from app.infrastructure.repositories.embedding_repository import EmbeddingRepository
 from app.core.db import get_session
@@ -10,7 +11,8 @@ class VectorSearchService:
         self.embedding_repository = EmbeddingRepository(self.session)
 
 
-    async def search(self, query: str, user_id: str, top_k: int = 5):
+    async def search(self, query: str, user_id: uuid.UUID, top_k: int = 5):
+
         query_embedding = self._embed(query)
 
         results = self.embedding_repository.search(user_id, query_embedding, top_k)

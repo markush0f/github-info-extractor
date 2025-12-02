@@ -76,7 +76,7 @@ class ChatService:
         self.session.commit()  
 
     async def _create_rag_context(self, content: str, user_id: UUID) -> str:
-        chunks = await self.vector_service.search(content, str(user_id))
+        chunks = await self.vector_service.search(content, user_id)
         return self.context_builder.build(content, chunks)
 
     def _create_prompt(self, history, rag_context: str, user_input: str) -> str:

@@ -27,7 +27,7 @@ class EmbeddingRepository:
     def get_by_id(self, entity_id: str):
         return self.session.get(Embedding, entity_id)
 
-    def search(self, user_id: str, query_embedding: list, top_k: int):
+    def search(self, user_id: uuid.UUID, query_embedding: list, top_k: int):
         embedding_str = f"[{','.join(str(x) for x in query_embedding)}]"
 
         sql = text(
@@ -66,7 +66,6 @@ class EmbeddingRepository:
             WHERE embeddings.chunk_id = chunks.id
             AND chunks.document_id = documents.id
             AND documents.entity_id = entities.id
-            AND entities.user_id = :user_id
         """
         )
         self.session.execute(sql, {"user_id": user_id})
