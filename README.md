@@ -1,17 +1,17 @@
 # User Info Bot – Local Installation Guide
 
-Este proyecto es un chatbot avanzado capaz de responder con **información real del usuario**, combinando scraping web mediante **HeadlessX**, análisis de repositorios de GitHub, bases vectoriales y arquitectura RAG utilizando la API de OpenAI.
+This project is an advanced chatbot capable of responding with **real information about the user**, combining web scraping via **HeadlessX**, GitHub repository analysis, vector-based semantic search, and a RAG (Retrieval-Augmented Generation) architecture using the OpenAI API.
 
-A continuación se explica cómo ejecutarlo **en local**, incluyendo base de datos con Docker y configuración completa mediante variables de entorno.
+Below is a complete guide to running the project **locally**, including Docker for the database, environment variables, and backend startup.
 
 ---
 
 ## 1. Requirements
 
 * Python 3.11+
-* Docker y Docker Compose
+* Docker & Docker Compose
 * Git
-* Una API Key de OpenAI
+* An OpenAI API Key
 
 ---
 
@@ -24,16 +24,20 @@ cd user-info-bot
 
 ---
 
-## 3. Environment Variables
+## 3. Install and Configure HeadlessX
 
-Antes de continuar, es necesario descargar e instalar el proyecto **HeadlessX**, ya que es un requisito para el scraping avanzado utilizado por este bot.
+This project requires **HeadlessX** to enable advanced dynamic web scraping.
 
-📌 **Repositorio y documentación de HeadlessX:**
+📌 **HeadlessX repository & documentation:**
 [https://headlessx.saify.me/#api](https://headlessx.saify.me/#api)
 
-Sigue sus instrucciones para levantar el servicio o generar tus claves de acceso.
+Follow the instructions in their documentation to set up the service and generate your API keys.
 
-Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
+---
+
+## 4. Environment Variables
+
+Create a `.env` file in the project root with the following structure:
 
 ```env
 # OPENAI
@@ -59,9 +63,9 @@ HEADLESSX_API=
 
 ---
 
-## 4. Start the Database with Docker
+## 5. Start the Database with Docker
 
-Ejecuta el servicio de PostgreSQL usando Docker Compose:
+Run PostgreSQL using Docker Compose:
 
 ```bash
 docker compose up -d
@@ -69,7 +73,7 @@ docker compose up -d
 
 ---
 
-## 5. Create and Activate Virtual Environment
+## 6. Install Python Dependencies
 
 ```bash
 python -m venv venv
@@ -79,21 +83,24 @@ pip install -r requirements.txt
 
 ---
 
-## 6. Run the Backend
+## 7. Run the Backend
 
-Inicia el servidor FastAPI:
+Start the FastAPI server:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-El proyecto estará disponible en:
+📌 **Important:**
+All database tables are automatically created on startup using SQLModel — no migrations are required.
+
+Your server will be available at:
 
 ```
 http://localhost:8000
 ```
 
-Documentación interactiva:
+Interactive API docs:
 
 ```
 http://localhost:8000/docs
@@ -101,12 +108,14 @@ http://localhost:8000/docs
 
 ---
 
-## 7. Summary
+## 8. Summary
 
-Con esta guía podrás ejecutar el proyecto localmente con:
+With this guide, you can run the project locally with:
 
-* PostgreSQL vía Docker
-* Backend FastAPI configurado
-* Variables de entorno listas para producción/desarrollo
+* PostgreSQL using Docker
+* FastAPI backend fully configured
+* Automatic table creation using SQLModel
+* Complete environment variables for development or production
+* HeadlessX integrated for dynamic web scraping
 
-Si deseas que añada instrucciones para despliegue en VPS o Dockerizar completamente el backend, puedo extender este README.
+If you would like a section for VPS deployment, full Dockerization of the backend, or a diagram explaining the system architecture, I can add it.
