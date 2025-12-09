@@ -3,11 +3,9 @@ from app.shared.services.rag_context_builder import RagContextBuilder
 from app.shared.services.record_finder import RecordFinder
 from app.domains.chats.models.chat import Chat
 from app.domains.messages.models.message import Message
-from app.core.db import get_session
 
 from app.infrastructure.repositories.chat_repository import ChatRepository
 from app.infrastructure.repositories.message_repository import MessageRepository
-from app.infrastructure.repositories.user_repository import UserRepository
 from app.domains.embeddings.vector_search_service import VectorSearchService
 from app.infrastructure.llm.llm_client import LLMClient
 from app.domains.users.service import UserService
@@ -63,43 +61,40 @@ class ChatService:
         self.user_service.get_user_or_404(user_id)
         return self.chat_repo.get_by_id(chat_id) or self.create_chat(user_id)
 
-
     def _store_user_message(self, chat_id: UUID, content: str):
         msg = Message(id=uuid4(), chat_id=chat_id, role="user", content=content)
         self.message_repo.create(msg)
-        self.session.commit()  
-
+        self.session.commit()
 
     def _store_assistant_message(self, chat_id: UUID, content: str):
         msg = Message(id=uuid4(), chat_id=chat_id, role="assistant", content=content)
         self.message_repo.create(msg)
-        self.session.commit()  
+        self.session.commit()
 
     async def _create_rag_context(self, content: str, user_id: UUID) -> str:
         chunks = await self.vector_service.search(content, user_id)
         return self.context_builder.build(content, chunks)
 
     def _create_prompt(self, history, rag_context: str, user_input: str) -> str:
-        history_text = "\n".join(f"{m.role.upper()}: {m.content}" for m in history)
+        history_text = "\n".join(f"{m.role.UPPER()}: {m.content}" for m in history)
 
         return f"""
-        You are a professional AI assistant specialized in generating clear and formal responses for recruiting and corporate communication contexts.
+        You are an AI assistant specialized in professional and formal corporate communication.
 
         Rules:
-        - You must only answer questions related to the user, their profile, experience, skills, projects, or professional background.
-        - If the user asks something unrelated to the user, you must reply: "Por favor, formula preguntas relacionadas con el usuario."
-        - Maintain a polished, concise, and confident tone.
-        - If the retrieved context does not contain the answer, state that you do not know in a professional manner.
-        - Never invent information about the user.
+        - Responses must always be short, direct, and concise.
+        - Only answer questions about the user: profile, experience, skills, projects, or background.
+        - If the question is unrelated: "Por favor, formula preguntas relacionadas con el usuario."
+        - If the retrieved context does not contain the answer, state professionally that you do not know.
+        - Never invent information.
 
-        Conversation history:
+        History:
         {history_text}
 
-        Retrieved context:
+        Context:
         {rag_context}
 
-        User message:
+        User:
         {user_input}
         """
-
 
